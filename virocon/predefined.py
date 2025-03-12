@@ -8,8 +8,10 @@ from virocon import (
     WeibullDistribution,
     LogNormalDistribution,
     ExponentiatedWeibullDistribution,
+    LoNoWeDistribution,
     DependenceFunction,
     WidthOfIntervalSlicer,
+    NumberOfIntervalsSlicer,
     variable_transform,
 )
 
@@ -506,3 +508,44 @@ def get_Nonzero_EW_Hs_S():
 
     return dist_descriptions, fit_descriptions, semantics, transformations
 
+
+def get_LoNoWe_hs_tp():
+    """
+    Similar to the DNV GL RP 2017 model, but uses the combined 
+    Lognormal-Weibull model in Hs (LoNoWe) rather than just weibull.
+    The model is fitted using the method of moment (MM) in scipy.
+    """
+
+    def _power3(x, a, b, c):
+        return a + b * x**c
+
+    def _exp3(x, a, b, c):
+        return a + b * np.exp(c * x)
+
+    bounds = [(0, None), (0, None), (None, None)]
+
+    power3 = DependenceFunction(_power3, bounds, latex="$a + b * x^c$")
+    exp3 = DependenceFunction(_exp3, bounds, latex="$a + b * \exp(c * x)$")
+
+    dist_description_hs = {
+        "distribution": LoNoWeDistribution(),
+        "intervals": NumberOfIntervalsSlicer(10),
+    }
+
+    dist_description_tz = {
+        "distribution": LogNormalDistribution(),
+        "conditional_on": 0,
+        "parameters": {"mu": power3, "sigma": exp3},
+    }
+
+    dist_descriptions = [dist_description_hs, dist_description_tz]
+
+    fit_descriptions = [{'method':'mm','weights':None},{'method':'mm','weights':None}]
+
+    semantics = {
+        "names": ["Significant wave height", "Peak wave period"],
+        "symbols": ["H_s", "T_p"],
+        "units": ["m", "s"],
+    }
+    
+    return dist_descriptions,fit_descriptions,semantics
