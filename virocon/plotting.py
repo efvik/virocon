@@ -8,8 +8,9 @@ from functools import partial
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as sts
+import seaborn as sns
 
-from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap, LogNorm
 
 from virocon.utils import calculate_design_conditions
 
@@ -19,6 +20,7 @@ __all__ = [
     "plot_histograms_of_interval_distributions",
     "plot_2D_isodensity",
     "plot_2D_contour",
+    "plot_2D_pdf_heatmap"
 ]
 
 
@@ -704,3 +706,117 @@ def plot_2D_contour(
         return ax
     else:
         return ax, design_conditions
+
+
+def plot_2D_pdf_heatmap(
+        model,
+        semantics,
+        limits = (25,25),
+        bin_size = (1,1),
+        bin_samples = (10,10),
+        percentage_values = True,
+        significant_digits = 4,
+        range_including = True,
+        marginal_values = True,
+        log_norm = True,
+        color_vmin = 1e-10,
+        ax=None,
+        **kwargs
+):
+    """
+    Visualize the PDF of 2D model as a heatmap. See options for details.
+
+    Parameters
+    ----------
+    model : GlobalHierarchicalModel
+        The model with a .pdf() method.
+    semantics : dict
+        Dictionary describing the variables - see predefined.py for examples.
+    limits : tuple
+        Upper limit for the plot on each variable.
+    bin_size : tuple
+        Bin size for each variable in the diagram.
+    bin_samples : tuple(int,int)
+        Number of samples to draw from pdf, for each bin. 
+        A higher number should give a better estimate 
+        of the true cumulative bin probability.
+    percentage_values : bool
+        Use percentage (of 100), rather than fraction (of 1).
+    significant_digits : int
+        How many significant digits to use in the scientific number notation.
+    range_including : bool, default True
+        Include the end of the bin range in the margins.
+    marginal_values : bool, default True
+        Include the marginal distribution of probability on the labels.
+    log_norm : bool, default True
+        Use logarithmic color norm.
+    color_vmin : float, default 1e-10
+        Minimum value for the color scale.
+    ax : matplotlib axes object, default None
+        Existing axes object, otherwise a new will be created.
+    **kwargs : keyword arguments
+        Any other keyword arguments will be passed directly to seaborn's heatmap.
+    """
+    # Number of boxes, samples per box
+    max_hs, max_tp = limits
+    step_hs, step_tp = bin_size
+    N_hs = int(max_hs/step_hs)
+    N_tp = int(max_tp/step_tp)
+    n_hs, n_tp = bin_samples
+
+    # PDF query matrix
+    h = np.linspace(0,max_hs,n_hs*N_hs,endpoint=False)
+    t = np.linspace(0,max_tp,n_tp*N_tp,endpoint=False)
+    ht = np.array(np.meshgrid(h,t,indexing='ij')).reshape(2,-1).swapaxes(0,1)
+
+    # PDF query
+    pdf = model.pdf(ht).reshape(len(h),len(t))
+    pdf_int = pdf.reshape(N_hs,n_hs,N_tp,n_tp)
+    pdf_int = pdf_int.sum(axis=(1,3))
+    pdf_int = pdf_int/pdf_int.sum()
+
+    if percentage_values:
+        pdf_int = pdf_int*100
+
+    marginal_hs = pdf_int.sum(axis=1)
+    marginal_tp = pdf_int.sum(axis=0)
+
+    # Writer for the x and y labels/ticks.
+    def _tick_writer(a,b,c):
+        a = int(a) if np.isclose(int(a),a) else np.round(a,1)
+        b = int(b) if np.isclose(int(b),b) else np.round(b,1)
+        c = str(int(c)) if not percentage_values else f'{c:.{significant_digits}f}'
+
+        tick = f'{a}'
+        if range_including: tick = tick + f'-{b}'
+        if marginal_values:
+            if percentage_values:
+                tick = tick + f' | {c}%'
+            else:
+                tick = tick + f' | {c}'
+        return tick
+
+    H = h[::n_hs]+step_hs
+    T = t[::n_tp]+step_tp
+    yticks = [_tick_writer(a,b,c) for a,b,c in zip(H-step_hs,H,marginal_hs)]
+    xticks = [_tick_writer(a,b,c) for a,b,c in zip(T-step_tp,T,marginal_tp)]
+
+    norm = LogNorm(vmin=color_vmin) if log_norm else None
+    
+    if ax == None:
+        _,ax = plt.subplots()
+    
+    sns.heatmap(
+        data = pdf_int,
+        xticklabels=xticks,
+        yticklabels=yticks,
+        linewidths=0.1,
+        norm=norm,
+        cbar=True,
+        linecolor='tab:orange',
+        annot=True,
+        ax=ax
+        **kwargs)
+    ax.invert_yaxis()
+
+    return ax
