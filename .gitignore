@@ -1,6 +1,10 @@
 # Folder where developers can store scripts for prototyping and playing around.
 my-scripts/*
 
+*.png
+*.csv
+*.nc
+*.ipynb
 *.pyc
 *.xml
 *.aux
