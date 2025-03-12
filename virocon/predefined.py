@@ -75,7 +75,9 @@ def get_DNVGL_Hs_Tz():
 
     dist_descriptions = [dist_description_hs, dist_description_tz]
 
-    fit_descriptions = None
+    fit_description_hs = {'method':'MM','weights':None}
+    fit_description_tz = {'method':'MM','weights':None}
+    fit_descriptions = [fit_description_hs,fit_description_tz]
 
     semantics = {
         "names": ["Significant wave height", "Zero-up-crossing period"],
@@ -135,7 +137,9 @@ def get_DNVGL_Hs_U():
 
     dist_descriptions = [dist_description_hs, dist_description_u]
 
-    fit_descriptions = None
+    fit_description_hs = {'method':'MM','weights':None}
+    fit_description_u = {'method':'MM','weights':None}
+    fit_descriptions = [fit_description_hs,fit_description_u]
 
     semantics = {
         "names": ["Significant wave height", "Wind speed"],
@@ -501,3 +505,4 @@ def get_Nonzero_EW_Hs_S():
     }
 
     return dist_descriptions, fit_descriptions, semantics, transformations
+
