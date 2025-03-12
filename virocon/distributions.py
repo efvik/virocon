@@ -1638,7 +1638,7 @@ class ScipyDistribution(Distribution):
 
 
 
-class LoNoWe(Distribution):
+class LoNoWeDistribution(Distribution):
     """
     A LoNoWe distribution (Lognormal-Weibull)
 
