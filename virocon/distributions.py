@@ -1635,3 +1635,162 @@ class ScipyDistribution(Distribution):
 
     def _fit_lsq(self, data, weights):
         raise NotImplementedError()
+
+
+
+class LoNoWe(Distribution):
+    """
+    A LoNoWe distribution (Lognormal-Weibull)
+
+    Parameters
+    ----------
+    alpha : float
+        Scale parameter of the weibull distribution. Defaults to 1.
+    beta : float
+        Shape parameter of the weibull distribution. Defaults to 1.
+    gamma : float
+        Location parameter of the weibull distribution (3-parameter weibull
+        distribution). Defaults to 0.
+
+    f_alpha : float
+        Fixed scale parameter of the weibull distribution (e.g. given physical
+        parameter). If this parameter is set, alpha is ignored. The fixed
+        parameter does not change, even when fitting the distribution. Defaults to None.
+    f_beta : float
+       Fixed shape parameter of the weibull distribution (e.g. given physical
+       parameter). If this parameter is set, beta is ignored. The fixed parameter
+       does not change, even when fitting the distribution. Defaults to None.
+    f_gamma : float
+        Fixed location parameter of the weibull distribution (e.g. given physical
+        parameter). If this parameter is set, gamma is ignored. The fixed
+        parameter does not change, even when fitting the distribution. Defaults to None.
+    
+    mu : float
+        Mean parameter of the corresponding normal distribution.
+        Defaults to 0.
+    sigma : float
+        Standard deviation of the corresponding normal distribution.
+        Defaults to 1.
+    f_mu : float
+        Fixed parameter mu of the lognormal distribution (e.g. given physical
+        parameter). If this parameter is set, mu is ignored. The fixed
+        parameter does not change, even when fitting the distribution. Defaults to None.
+    f_sigma : float
+       Fixed parameter sigma of the lognormal distribution (e.g. given
+       physical parameter). If this parameter is set, sigma is ignored. The
+       fixed parameter does not change, even when fitting the distribution. Defaults to None.
+    """
+
+    def __init__(
+        self, shifting_point=1, f_shifting_point=None, alpha=1, beta=1, gamma=0, f_alpha=None, f_beta=None, f_gamma=None, mu=0, sigma=1, f_mu=None, f_sigma=None
+    ):
+        self.weibull = WeibullDistribution(alpha=alpha,beta=beta,gamma=gamma,f_alpha=f_alpha,f_beta=f_beta,f_gamma=f_gamma)
+        self.lognormal = LogNormalDistribution(mu=mu,sigma=sigma,f_mu=f_mu,f_sigma=f_sigma)
+
+        self.shifting_point = shifting_point if f_shifting_point is None else f_shifting_point
+        self.f_shifting_point = f_shifting_point
+
+    @property
+    def parameters(self):
+
+        return {"alpha": self.weibull.alpha, 
+                "beta": self.weibull.beta, 
+                "gamma": self.weibull.gamma,
+                "mu":self.lognormal.mu,
+                "sigma":self.lognormal.sigma}
+    
+    def cdf(self, x, alpha=None, beta=None, gamma=None, mu=None, sigma=None):
+        
+        x = np.array(x)
+        cdf = np.zeros_like(x,dtype=float)
+
+        lognormal_scipy_par = self.lognormal._get_scipy_parameters(mu,sigma)
+        weibull_scipy_par = self.weibull._get_scipy_parameters(alpha, beta, gamma)
+
+        weibull_mask = x<=self.shifting_point
+        lognormal_mask = x>self.shifting_point
+
+        cdf[lognormal_mask] = sts.lognorm.cdf(x[lognormal_mask],*lognormal_scipy_par)
+        cdf[weibull_mask] = sts.weibull_min.cdf(x[weibull_mask],*weibull_scipy_par)
+
+        return cdf
+
+    def icdf(self, prob, alpha=None, beta=None, gamma=None, mu=None, sigma=None):
+
+        weibull_scipy_par = self.weibull._get_scipy_parameters(alpha, beta, gamma)
+        weibull_x = sts.weibull_min.ppf(prob, *weibull_scipy_par)
+        
+        lognormal_scipy_par = self.lognormal._get_scipy_parameters(mu,sigma)
+        lognormal_x = sts.lognorm.ppf(prob, *lognormal_scipy_par)
+
+        shift_mask = np.mean([lognormal_x, weibull_x],axis=0)<=self.shifting_point
+        return np.where(shift_mask,lognormal_x,weibull_x)
+
+    def pdf(self, x, alpha=None, beta=None, gamma=None, mu=None,sigma=None):
+
+        x_low = x[x<=self.shifting_point]
+        x_high = x[x>self.shifting_point]
+
+        lognormal_scipy_par = self.lognormal._get_scipy_parameters(mu,sigma)
+        lognormal_pdf = sts.lognorm.pdf(x_low, *lognormal_scipy_par)
+
+        weibull_scipy_par = self.weibull._get_scipy_parameters(alpha, beta, gamma)
+        weibull_pdf = sts.weibull_min.pdf(x_high, *weibull_scipy_par)
+
+        return np.concatenate([lognormal_pdf,weibull_pdf],axis=0)
+
+    def draw_sample(self, n, alpha=None, beta=None, gamma=None, mu=None, sigma=None, *, random_state=None):
+
+        lognormal_fraction = self.cdf(self.shifting_point)
+        lognormal_n = np.ceil(lognormal_fraction*n).astype('int')
+        weibull_n = n - lognormal_n
+
+        lognormal_sample = np.array([])
+        while len(lognormal_sample) < lognormal_n:
+            lognormal_draw = self.lognormal.draw_sample(n)
+            lognormal_draw = lognormal_draw[lognormal_draw <= self.shifting_point]
+            lognormal_sample = np.concatenate([lognormal_sample,lognormal_draw],axis=0)
+        lognormal_sample = lognormal_sample[:lognormal_n]
+
+        weibull_sample = np.array([])
+        while len(weibull_sample) < weibull_n:
+            weibull_draw = self.weibull.draw_sample(n)
+            weibull_draw = weibull_draw[weibull_draw > self.shifting_point]
+            weibull_sample = np.concatenate([weibull_sample,weibull_draw],axis=0)
+        weibull_sample = weibull_sample[:weibull_n]
+
+        sample = np.concatenate([weibull_sample,lognormal_sample],axis=0)
+        np.random.shuffle(sample)
+
+        return sample
+
+    def _fit_mle(self, sample, method=('MLE','MLE')):
+        
+        if type(method)==str:
+            method = (method,method)
+        self.weibull._fit_mle(sample,method=method[0])
+        self.lognormal._fit_mle(sample,method=method[1])
+        self._fit_shifting_point(sample)
+
+    def _fit_lsq(self, data, weights):
+        raise NotImplementedError()
+    
+    def _fit_shifting_point(self,sample):
+
+        data = np.sort(np.squeeze(sample))
+        data = data[(data>0.5*np.max(data)) & (data<0.95*np.max(data))]
+        #data = data[int(0.6*len(data)):int(0.99*len(data))]
+        
+        weib_pdf = self.weibull.pdf(data)
+        lono_pdf = self.lognormal.pdf(data)
+        d_pdf = np.squeeze(np.abs(weib_pdf-lono_pdf))
+
+        peaks, _ = find_peaks(-d_pdf)
+        if not peaks.size: 
+            print('Warning: No optimal shifting point found.')
+            peaks = [np.argmin(d_pdf)]
+
+        self.shifting_point = np.squeeze(data[peaks[-1]])
+
+    def __repr__(self):
+        return f"\n < {self.shifting_point:.3f}: {str(self.lognormal)}, \n > {self.shifting_point:.3f}: {str(self.weibull)} \n"
