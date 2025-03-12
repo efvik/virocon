@@ -10,6 +10,7 @@ import scipy.stats as sts
 
 from abc import ABC, abstractmethod
 from scipy.optimize import fmin
+from scipy.signal import find_peaks
 
 __all__ = [
     "WeibullDistribution",
@@ -415,8 +416,8 @@ class Distribution(ABC):
             Valid options for str are: 'linear', 'quadratic', 'cubic'.
         """
 
-        if method.lower() == "mle":
-            self._fit_mle(data)
+        if method.lower() == "mle" or method.lower() == "mm":
+            self._fit_mle(data,method)
         elif method.lower() == "lsq" or method.lower() == "wlsq":
             self._fit_lsq(data, weights)
         else:
@@ -427,7 +428,7 @@ class Distribution(ABC):
             )
 
     @abstractmethod
-    def _fit_mle(self, data):
+    def _fit_mle(self, data, method='MLE'):
         """Fit the distribution using maximum likelihood estimation."""
 
     @abstractmethod
@@ -584,10 +585,10 @@ class WeibullDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.weibull_min.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample):
+    def _fit_mle(self, sample, method='MLE'):
         p0 = {"alpha": self.alpha, "beta": self.beta, "gamma": self.gamma}
 
-        fparams = {}
+        fparams = {'method':method}
         if self.f_beta is not None:
             fparams["f0"] = self.f_beta
         if self.f_gamma is not None:
@@ -726,10 +727,10 @@ class LogNormalDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.lognorm.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample):
+    def _fit_mle(self, sample, method='MLE'):
         p0 = {"scale": self._scale, "sigma": self.sigma}
 
-        fparams = {"floc": 0}
+        fparams = {"floc": 0, 'method':method}
 
         if self.f_sigma is not None:
             fparams["f0"] = self.f_sigma
@@ -859,10 +860,10 @@ class NormalDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.norm.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample):
+    def _fit_mle(self, sample, method='MLE'):
         p0 = {"loc": self.mu, "scale": self.sigma}
 
-        fparams = {}
+        fparams = {'method':method}
 
         if self.f_mu is not None:
             fparams["floc"] = self.f_mu
@@ -966,7 +967,7 @@ class LogNormalNormFitDistribution(LogNormalDistribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.lognorm.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample):
+    def _fit_mle(self, sample, method='MLE'):
         if self.f_mu_norm is None:
             self.mu_norm = np.mean(sample)
         else:
@@ -1078,10 +1079,10 @@ class ExponentiatedWeibullDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.exponweib.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample):
+    def _fit_mle(self, sample, method='MLE'):
         p0 = {"alpha": self.alpha, "beta": self.beta, "delta": self.delta}
 
-        fparams = {"floc": 0}
+        fparams = {"floc": 0, "method":method}
 
         if self.f_delta is not None:
             fparams["f0"] = self.f_delta
@@ -1338,10 +1339,10 @@ class GeneralizedGammaDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.gengamma.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample):
+    def _fit_mle(self, sample, method='MLE'):
         p0 = {"m": self.m, "c": self.c, "scale": self._scale}
 
-        fparams = {"floc": 0}
+        fparams = {"floc": 0, "method":method}
 
         if self.f_m is not None:
             fparams["fshape1"] = self.f_m
