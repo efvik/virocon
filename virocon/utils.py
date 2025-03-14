@@ -176,3 +176,34 @@ def sort_points_to_form_continuous_line(x, y, search_for_optimal_start=False):
         yy = y[opt_order]
 
     return xx, yy
+
+def get_DNVGL_steepness(x,input='tp',output='hs'):
+    if np.any(x<0): raise ValueError('Values must be real and positive.')
+    request = input+output
+
+    # Define constants (dependng on tp or tz)
+    g = 9.81
+    if request in ['hstp','tphs']:
+        sl, su = 1/15, 1/25
+        tl, tu = 8, 15
+    elif request in ['hstz','tzhs']:
+        sl, su = 1/10, 1/15
+        tl, tu = 6, 12
+    else:
+        raise ValueError('Unknown input-output request.')
+
+    inverse = True if input=='hs' else False
+
+    # Define functions for t->h or h->t
+    def t_to_h(t):
+        def low(t): return sl*(t**2)*g/(2*np.pi)
+        def high(t):return su*(t**2)*g/(2*np.pi)
+        def mid(t): return np.interp(t,[tl,tu],[low(tl),high(tu)])
+        return np.piecewise(t,[t<=tl,t>=tu],[low,high,mid])
+
+    if inverse:
+        t = np.linspace(0,100,10000)
+        h = t_to_h(t)
+        return np.interp(x,h,t)
+    else:
+        return t_to_h(x)
