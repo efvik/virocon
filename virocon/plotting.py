@@ -820,3 +820,39 @@ def plot_2D_pdf_heatmap(
     ax.invert_yaxis()
 
     return ax
+
+def plot_DNVGL_steepness(ax:plt.axes,peak_period_line=True,**kwargs):
+    """
+    Plot dnv gl RP 2017/2019 recommended steepness line, within the axis limits.
+    Assumes t is x-axis, and h is y-axis.
+
+    Parameters
+    ----------
+    ax : matplotlib axes
+        The figure to plot on. Works best if data has already been plotted. 
+    peak_period : bool, default True
+        Use the line corresponding to peak wave period (Tp). False will give the steepness line of mean wave period (Tz).
+    **kwargs : keyword arguments
+        Any matplotlib.plot() keyword arguments (color, linestyle, etc.).
+    """
+    xlim = np.max([l.get_xdata().max() for l in ax.get_lines()])
+    ylim = np.max([l.get_ydata().max() for l in ax.get_lines()])    
+
+    # Define t and get h from steepness
+    t = np.linspace(0,xlim,10000,endpoint=True)
+    input = 'tp' if peak_period_line else 'tz'
+    h = get_DNVGL_steepness(t,input)
+    
+    # Use only values within the plot limits.
+    mask = h<ylim
+    h = h[mask]
+    t = t[mask]
+
+    # These are defaults, to be overwritten by **kwargs.
+    plot_params = {**{
+        'linestyle':'--',
+        'color':'black',
+    },**kwargs}
+    ax.plot(t,h,**plot_params)
+
+    return ax
