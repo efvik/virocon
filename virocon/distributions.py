@@ -15,6 +15,7 @@ from scipy.signal import find_peaks
 __all__ = [
     "WeibullDistribution",
     "LogNormalDistribution",
+    "LoNoWeDistribution",
     "NormalDistribution",
     "ExponentiatedWeibullDistribution",
     "GeneralizedGammaDistribution",
