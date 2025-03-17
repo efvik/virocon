@@ -8,10 +8,11 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           args: check . # Run linting, fails on issues.
-      - name: Check formatting
+      - name: Check formatting # Run formatting, fails on issues.
         run: |
           ruff format --check . || (
             echo "Formatting issues detected. Showing diff:" &&
             ruff format . &&
             git diff
+            exit 1
           )
