@@ -9,4 +9,9 @@ jobs:
         with:
           args: check . # Run linting, fails on issues.
       - name: Check formatting
-        run: ruff format --check . # Ensures formatting is correct, fails otherwise.
+        run: |
+          ruff format --check . || (
+            echo "Formatting issues detected. Showing diff:" &&
+            ruff format . &&
+            git diff
+          )
