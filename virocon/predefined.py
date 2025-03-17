@@ -63,7 +63,7 @@ def get_DNVGL_Hs_Tz():
     exp3 = DependenceFunction(_exp3, bounds, latex="$a + b * \exp(c * x)$")
 
     dist_description_hs = {
-        "distribution": WeibullDistribution(),
+        "distribution": WeibullDistribution(f_gamma=0),
         "intervals": WidthOfIntervalSlicer(width=0.5),
     }
 
@@ -75,9 +75,7 @@ def get_DNVGL_Hs_Tz():
 
     dist_descriptions = [dist_description_hs, dist_description_tz]
 
-    fit_description_hs = {'method':'MM','weights':None}
-    fit_description_tz = {'method':'MM','weights':None}
-    fit_descriptions = [fit_description_hs,fit_description_tz]
+    fit_descriptions = [{'method':'MM','weights':None},None]
 
     semantics = {
         "names": ["Significant wave height", "Zero-up-crossing period"],
@@ -137,9 +135,7 @@ def get_DNVGL_Hs_U():
 
     dist_descriptions = [dist_description_hs, dist_description_u]
 
-    fit_description_hs = {'method':'MM','weights':None}
-    fit_description_u = {'method':'MM','weights':None}
-    fit_descriptions = [fit_description_hs,fit_description_u]
+    fit_descriptions = None
 
     semantics = {
         "names": ["Significant wave height", "Wind speed"],
