@@ -65,7 +65,7 @@ def fit_constrained_function(func, x, y, p0, method, bounds, constraints, weight
     else:
         # TODO implement WLSQ
         raise NotImplementedError(
-            "At this time only least squares (lsq) " "fitting is supported."
+            "At this time only least squares (lsq) fitting is supported."
         )
 
     if constraints is None:
