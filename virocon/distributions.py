@@ -10,7 +10,6 @@ import scipy.stats as sts
 
 from abc import ABC, abstractmethod
 from scipy.optimize import fmin
-from scipy.signal import find_peaks
 
 __all__ = [
     "WeibullDistribution",
@@ -1478,10 +1477,10 @@ class VonMisesDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.vonmises.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample):
+    def _fit_mle(self, sample, method='MLE'):
         p0 = {"shape": self.kappa, "loc": self.mu}
 
-        fparams = {"fscale": 1}
+        fparams = {"fscale": 1, "method":method}
 
         if self.f_mu is not None:
             fparams["floc"] = self.f_mu
@@ -1612,13 +1611,13 @@ class ScipyDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return self.scipy_dist.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample):
+    def _fit_mle(self, sample, method='MLE'):
         # Split initial parameter values into positional shape parameters and loc and scale.
         p0 = [v for k, v in self.parameters.items() if k != "loc" and k != "scale"]
         loc0 = self.parameters.get("loc", 0)
         scale0 = self.parameters.get("scale", 1)
 
-        fparams = {}
+        fparams = {'method':method}
         for par_name in self._param_names:
             val = getattr(self, f"f_{par_name}")
             if val is not None:
