@@ -862,7 +862,7 @@ class NormalDistribution(Distribution):
     def _fit_mle(self, sample, method='MLE'):
         p0 = {"loc": self.mu, "scale": self.sigma}
 
-        fparams = {'method':method}
+        fparams = {'method': method}
 
         if self.f_mu is not None:
             fparams["floc"] = self.f_mu
