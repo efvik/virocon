@@ -1,8 +1,18 @@
 name: Ruff
-on: [ push, pull_request ]
+on: [push, pull_request]
 jobs:
   ruff:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: chartboost/ruff-action@v1
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: check . # Run linting, fails on issues.
+      - name: Check formatting # Run formatting, fails on issues.
+        run: |
+          ruff format --check . || (
+            echo "Formatting issues detected. Showing diff:" &&
+            ruff format . &&
+            git diff
+            exit 1
+          )
