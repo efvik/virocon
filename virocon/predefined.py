@@ -75,7 +75,7 @@ def get_DNVGL_Hs_Tz():
 
     dist_descriptions = [dist_description_hs, dist_description_tz]
 
-    fit_descriptions = [{'method':'MM','weights':None},None]
+    fit_descriptions = [{"method": "MM", "weights": None}, None]
 
     semantics = {
         "names": ["Significant wave height", "Zero-up-crossing period"],
@@ -501,4 +501,3 @@ def get_Nonzero_EW_Hs_S():
     }
 
     return dist_descriptions, fit_descriptions, semantics, transformations
-

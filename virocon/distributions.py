@@ -416,7 +416,7 @@ class Distribution(ABC):
         """
 
         if method.lower() == "mle" or method.lower() == "mm":
-            self._fit_mle(data,method)
+            self._fit_mle(data, method)
         elif method.lower() == "lsq" or method.lower() == "wlsq":
             self._fit_lsq(data, weights)
         else:
@@ -427,7 +427,7 @@ class Distribution(ABC):
             )
 
     @abstractmethod
-    def _fit_mle(self, data, method='MLE'):
+    def _fit_mle(self, data, method="MLE"):
         """Fit the distribution using maximum likelihood estimation."""
 
     @abstractmethod
@@ -584,10 +584,10 @@ class WeibullDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.weibull_min.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample, method='MLE'):
+    def _fit_mle(self, sample, method="MLE"):
         p0 = {"alpha": self.alpha, "beta": self.beta, "gamma": self.gamma}
 
-        fparams = {'method':method}
+        fparams = {"method": method}
         if self.f_beta is not None:
             fparams["f0"] = self.f_beta
         if self.f_gamma is not None:
@@ -726,10 +726,10 @@ class LogNormalDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.lognorm.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample, method='MLE'):
+    def _fit_mle(self, sample, method="MLE"):
         p0 = {"scale": self._scale, "sigma": self.sigma}
 
-        fparams = {"floc": 0, 'method':method}
+        fparams = {"floc": 0, "method": method}
 
         if self.f_sigma is not None:
             fparams["f0"] = self.f_sigma
@@ -859,10 +859,10 @@ class NormalDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.norm.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample, method='MLE'):
+    def _fit_mle(self, sample, method="MLE"):
         p0 = {"loc": self.mu, "scale": self.sigma}
 
-        fparams = {'method':method}
+        fparams = {"method": method}
 
         if self.f_mu is not None:
             fparams["floc"] = self.f_mu
@@ -966,7 +966,7 @@ class LogNormalNormFitDistribution(LogNormalDistribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.lognorm.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample, method='MLE'):
+    def _fit_mle(self, sample, method="MLE"):
         if self.f_mu_norm is None:
             self.mu_norm = np.mean(sample)
         else:
@@ -1078,10 +1078,10 @@ class ExponentiatedWeibullDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.exponweib.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample, method='MLE'):
+    def _fit_mle(self, sample, method="MLE"):
         p0 = {"alpha": self.alpha, "beta": self.beta, "delta": self.delta}
 
-        fparams = {"floc": 0, "method":method}
+        fparams = {"floc": 0, "method": method}
 
         if self.f_delta is not None:
             fparams["f0"] = self.f_delta
@@ -1338,10 +1338,10 @@ class GeneralizedGammaDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.gengamma.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample, method='MLE'):
+    def _fit_mle(self, sample, method="MLE"):
         p0 = {"m": self.m, "c": self.c, "scale": self._scale}
 
-        fparams = {"floc": 0, "method":method}
+        fparams = {"floc": 0, "method": method}
 
         if self.f_m is not None:
             fparams["fshape1"] = self.f_m
@@ -1477,10 +1477,10 @@ class VonMisesDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.vonmises.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample, method='MLE'):
+    def _fit_mle(self, sample, method="MLE"):
         p0 = {"shape": self.kappa, "loc": self.mu}
 
-        fparams = {"fscale": 1, "method":method}
+        fparams = {"fscale": 1, "method": method}
 
         if self.f_mu is not None:
             fparams["floc"] = self.f_mu
@@ -1611,13 +1611,13 @@ class ScipyDistribution(Distribution):
         rvs_size = self._get_rvs_size(n, scipy_par)
         return self.scipy_dist.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
-    def _fit_mle(self, sample, method='MLE'):
+    def _fit_mle(self, sample, method="MLE"):
         # Split initial parameter values into positional shape parameters and loc and scale.
         p0 = [v for k, v in self.parameters.items() if k != "loc" and k != "scale"]
         loc0 = self.parameters.get("loc", 0)
         scale0 = self.parameters.get("scale", 1)
 
-        fparams = {'method':method}
+        fparams = {"method": method}
         for par_name in self._param_names:
             val = getattr(self, f"f_{par_name}")
             if val is not None:
