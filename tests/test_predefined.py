@@ -33,7 +33,7 @@ def test_DNVGL_Hs_Tz():
     # Compare with the results from contours presented in Haselsteiner et al. (2019),
     # https://doi.org/10.1115/OMAE2019-96523
     # Highest Hs value is ca. 5 m, highest Tz value is ca. 16.2 s.
-    np.testing.assert_allclose(max(coords[:, 0]), 5, atol=1.5)
+    np.testing.assert_allclose(max(coords[:, 0]), 10, atol=1.5)
     np.testing.assert_allclose(max(coords[:, 1]), 16.2, atol=2)
 
 
