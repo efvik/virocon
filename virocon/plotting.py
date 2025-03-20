@@ -84,34 +84,23 @@ def get_default_semantics(n_dim):
     return semantics
 
 
-def _get_n_axes(n_intervals):
-    max_intervals = 16
-    if n_intervals > max_intervals:
-        raise NotImplementedError(
-            f"Automatic axes creation is only supported for up to {max_intervals} intervals."
+def _get_n_axes(n_intervals, max_cols=4):
+    if n_intervals < max_cols**2:
+        table = np.array(
+            [
+                (rows, cols)
+                for cols in range(1, max_cols + 1)
+                for rows in range(1, cols + 1)
+            ]
         )
-
-    table = [
-        (1, 1),
-        (1, 2),
-        (1, 3),
-        (2, 2),
-        (2, 3),
-        (2, 3),
-        (3, 3),
-        (3, 3),
-        (3, 3),
-        (4, 4),
-        (4, 4),
-        (4, 4),
-        (4, 4),
-        (4, 4),
-        (4, 4),
-        (4, 4),
-    ]
+        table = table[np.prod(table, axis=1) >= n_intervals]
+        (nrows, ncols) = table[np.argmin(np.prod(table, axis=1) - n_intervals)]
+    else:
+        nrows = 1 + ((n_intervals - 1) // max_cols)
+        ncols = max_cols
 
     fig, axes = plt.subplots(
-        *table[n_intervals], sharex=True, sharey=True, squeeze=False
+        nrows=nrows, ncols=ncols, sharex=True, sharey=True, squeeze=False
     )
     return fig, axes.ravel()
 
@@ -325,7 +314,11 @@ def plot_dependence_functions(model, semantics=None, par_rename={}, axes=None):
 
 
 def plot_histograms_of_interval_distributions(
-    model, sample, semantics=None, plot_pdf=True
+    model,
+    sample,
+    semantics=None,
+    plot_pdf=True,
+    max_cols=4,
 ):
     """
     Plot histograms of all model dimensions.
@@ -343,6 +336,8 @@ def plot_histograms_of_interval_distributions(
         The description of the model. If None (the default) generic semantics will be used.
     plot_pdf: boolean, optional
         Whether the fitted probability density should be plotted. Defaults to True.
+    max_cols : int, default 4
+        Number of columns (subfigures horizontally).
 
     Returns
     -------
@@ -419,7 +414,7 @@ def plot_histograms_of_interval_distributions(
                     np.sort(data_intervals[i]), np.sort(cond_dist.data_intervals[i])
                 )
 
-            fig, axes = _get_n_axes(n_intervals)
+            fig, axes = _get_n_axes(n_intervals, max_cols=max_cols)
             for interval_idx in range(n_intervals):
                 cond_val = conditioning_values[interval_idx]
                 data = data_intervals[interval_idx]
