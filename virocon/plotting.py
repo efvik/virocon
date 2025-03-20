@@ -456,6 +456,8 @@ def plot_2D_isodensity(
     levels=None,
     ax=None,
     n_grid_steps=250,
+    cmap=None,
+    **kwargs,
 ):
     """
     Plot isodensity contours and a data sample for a 2D model.
@@ -486,6 +488,11 @@ def plot_2D_isodensity(
     ax : matplotlib Axes, optional
         Matplotlib axes object to use for plotting. If None (default) a new
         figure will be created.
+    cmap : matplotlib colormap, optional
+        The colormap to use for the isodensity contours.
+    **kwargs : keyword arguments
+        Any other keyword arguments for matplotlib.pyplot.contour().
+        Example: linewidths=[1,2,3], linestyles=["solid","dotted","dashed"]
 
     Returns
     -------
@@ -560,13 +567,14 @@ def plot_2D_isodensity(
             ::-1
         ]
 
-    cmap = _rainbow_PuRd()
+    if cmap is None:
+        cmap = _rainbow_PuRd()
     colors = cmap(np.linspace(0, 1, num=n_levels))
-    CS = ax.contour(X, Y, Z, levels=levels, colors=colors)
-    proxies = [plt.Line2D([], [], color=pc.get_edgecolor()[0]) for pc in CS.collections]
+    CS = ax.contour(X, Y, Z, levels=levels, colors=colors, **kwargs)
+    handles, _ = CS.legend_elements()
     ax.legend(
-        proxies,
-        lvl_labels,
+        handles=handles,
+        labels=lvl_labels,
         loc="upper left",
         ncol=1,
         frameon=False,
