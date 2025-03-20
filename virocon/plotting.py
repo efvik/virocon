@@ -601,6 +601,7 @@ def plot_2D_contour(
     semantics=None,
     swap_axis=False,
     ax=None,
+    **kwargs,
 ):
     """
     Plot a 2D contour.
@@ -627,6 +628,9 @@ def plot_2D_contour(
     ax : matplotlib Axes, optional
         Matplotlib axes object to use for plotting. If None (default) a new
         figure will be created.
+    **kwargs : keyword arguments
+        Any other keyword arguments to pass to the matplotlib plotting function,
+        Example: color="blue", linewidth=2, label="100-year contour"
 
     Returns
     -------
@@ -689,7 +693,9 @@ def plot_2D_contour(
     # was reverted as we were not sure about the reason.
     # https://github.com/virocon-organization/virocon/commit/45482e0b5ff2d21c594f0e292b3db9c971881b5c
     # https://github.com/virocon-organization/virocon/pull/124#discussion_r684193507
-    ax.plot(x, y, c="#BB5566")
+    if "color" not in kwargs and "c" not in kwargs:
+        kwargs["c"] = "#BB5566"
+    ax.plot(x, y, **kwargs)
     # ax.plot(np.asarray(x, dtype=object), np.asarray(y, dtype=object), c="#BB5566")
 
     x_name = semantics["names"][x_idx]
