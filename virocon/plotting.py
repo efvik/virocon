@@ -569,6 +569,8 @@ def plot_2D_isodensity(
 
     if cmap is None:
         cmap = _rainbow_PuRd()
+    elif isinstance(cmap, str):
+        cmap = plt.get_cmap(cmap)
     colors = cmap(np.linspace(0, 1, num=n_levels))
     CS = ax.contour(X, Y, Z, levels=levels, colors=colors, **kwargs)
     handles, _ = CS.legend_elements()
