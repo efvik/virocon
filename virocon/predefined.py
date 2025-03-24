@@ -63,7 +63,7 @@ def get_DNVGL_Hs_Tz():
     exp3 = DependenceFunction(_exp3, bounds, latex="$a + b * \exp(c * x)$")
 
     dist_description_hs = {
-        "distribution": WeibullDistribution(f_gamma=0),
+        "distribution": WeibullDistribution(),
         "intervals": WidthOfIntervalSlicer(width=0.5),
     }
 
