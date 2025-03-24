@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 from virocon._nsphere import NSphere
 from virocon.plotting import get_default_semantics
 from virocon.utils import sort_points_to_form_continuous_line
+from virocon.jointmodels import GlobalHierarchicalModel, TransformedModel
 
 __all__ = [
     "calculate_alpha",
@@ -198,12 +199,12 @@ class IFORMContour(Contour):
     """
 
     def __init__(self, model, alpha, n_points=180):
-        allowed_model_types = ("GlobalHierarchicalModel", "TransformedModel")
-        if type(model).__name__ in allowed_model_types:
+        allowed_model_types = (GlobalHierarchicalModel, TransformedModel)
+        if isinstance(model, allowed_model_types):
             self.model = model
         else:
             raise TypeError(
-                f"Type of model was {type(model).__name__} but among {allowed_model_types}"
+                f"Type of model was {type(model).__name__} but expected one of {allowed_model_types}"
             )
         self.alpha = alpha
         self.n_points = n_points
@@ -223,10 +224,10 @@ class IFORMContour(Contour):
         # but a TransformedModel not. Consequently, contour calculation requries different
         # algorithms for these two cases. TransformedModel is used the EW models defined in
         # predefined.py .
-        if type(self.model).__name__ == "GlobalHierarchicalModel":
+        if isinstance(self.model, GlobalHierarchicalModel):
             distributions = self.model.distributions
             conditional_on = self.model.conditional_on
-        elif type(self.model).__name__ == "TransformedModel":
+        elif isinstance(self.model, TransformedModel):
             distributions = None
             conditional_on = None
         else:
