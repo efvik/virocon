@@ -999,6 +999,8 @@ class LogNormalNormFitDistribution(LogNormalDistribution):
         return sts.lognorm.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
     def _fit_mom(self, sample):
+        # We need to have a _fit_mom definition here as otherwise the 
+        # the LogNormalDistribution's _fit_mom method would be called.
         raise NotImplementedError()
 
     def _fit_mle(self, sample):
