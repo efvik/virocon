@@ -64,7 +64,9 @@ def get_DNVGL_Hs_Tz():
 
     dist_description_hs = {
         "distribution": WeibullDistribution(),
-        "intervals": WidthOfIntervalSlicer(width=0.5),
+        "intervals": WidthOfIntervalSlicer(
+            width=0.5
+        ),  # 0.5 m is a common choice, see e.g. 10.1115/OMAE2020-18041
     }
 
     dist_description_tz = {
