@@ -457,7 +457,7 @@ def plot_2D_isodensity(
     ax=None,
     n_grid_steps=250,
     cmap=None,
-    **kwargs,
+    contour_kwargs=None,
 ):
     """
     Plot isodensity contours and a data sample for a 2D model.
@@ -490,9 +490,9 @@ def plot_2D_isodensity(
         figure will be created.
     cmap : matplotlib colormap, optional
         The colormap to use for the isodensity contours.
-    **kwargs : keyword arguments
+    contour_kwargs : dict
         Any other keyword arguments for matplotlib.pyplot.contour().
-        Example: linewidths=[1,2,3], linestyles=["solid","dotted","dashed"]
+        Example: {"linewidths": [1,2,3], "linestyles": ["solid","dotted","dashed"]}
 
     Returns
     -------
@@ -572,7 +572,8 @@ def plot_2D_isodensity(
     elif isinstance(cmap, str):
         cmap = plt.get_cmap(cmap)
     colors = cmap(np.linspace(0, 1, num=n_levels))
-    CS = ax.contour(X, Y, Z, levels=levels, colors=colors, **kwargs)
+    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
+    CS = ax.contour(X, Y, Z, levels=levels, colors=colors, **plot_kwargs)
     handles, _ = CS.legend_elements()
     ax.legend(
         handles=handles,
@@ -603,7 +604,7 @@ def plot_2D_contour(
     semantics=None,
     swap_axis=False,
     ax=None,
-    **kwargs,
+    plot_kwargs=None,
 ):
     """
     Plot a 2D contour.
@@ -630,9 +631,9 @@ def plot_2D_contour(
     ax : matplotlib Axes, optional
         Matplotlib axes object to use for plotting. If None (default) a new
         figure will be created.
-    **kwargs : keyword arguments
+    plot_kwargs : dict
         Any other keyword arguments to pass to the matplotlib plotting function,
-        Example: color="blue", linewidth=2, label="100-year contour"
+        Example: {"color": "blue", "linewidth": 2, "label": "100-year contour"
 
     Returns
     -------
@@ -695,9 +696,10 @@ def plot_2D_contour(
     # was reverted as we were not sure about the reason.
     # https://github.com/virocon-organization/virocon/commit/45482e0b5ff2d21c594f0e292b3db9c971881b5c
     # https://github.com/virocon-organization/virocon/pull/124#discussion_r684193507
-    if "color" not in kwargs and "c" not in kwargs:
-        kwargs["c"] = "#BB5566"
-    ax.plot(x, y, **kwargs)
+    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
+    if "color" not in plot_kwargs and "c" not in plot_kwargs:
+        plot_kwargs["c"] = "#BB5566"
+    ax.plot(x, y, **plot_kwargs)
     # ax.plot(np.asarray(x, dtype=object), np.asarray(y, dtype=object), c="#BB5566")
 
     x_name = semantics["names"][x_idx]
