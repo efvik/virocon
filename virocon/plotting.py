@@ -337,7 +337,7 @@ def plot_histograms_of_interval_distributions(
     plot_pdf: boolean, optional
         Whether the fitted probability density should be plotted. Defaults to True.
     max_cols : int, default 4
-        Number of columns (subfigures horizontally).
+        Maximum number of columns (subfigures horizontally).
 
     Returns
     -------
