@@ -85,9 +85,17 @@ def get_default_semantics(n_dim):
 
 
 def _get_n_axes(n_intervals, max_cols=4):
-    if n_intervals < max_cols**2:
+    if n_intervals <= 0:
+        raise ValueError(
+            f"n_intervals should be a positive integer, but got {n_intervals}."
+        )
+    elif n_intervals < max_cols**2:
         table = np.array(
-            [(rows, cols) for cols in range(max_cols + 1) for rows in range(cols + 1)]
+            [
+                (rows, cols)
+                for cols in range(1, max_cols + 1)
+                for rows in range(1, cols + 1)
+            ]
         )
         table = table[np.prod(table, axis=1) >= n_intervals]
         (nrows, ncols) = table[np.argmin(np.prod(table, axis=1) - n_intervals)]
