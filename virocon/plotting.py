@@ -84,34 +84,27 @@ def get_default_semantics(n_dim):
     return semantics
 
 
-def _get_n_axes(n_intervals):
-    max_intervals = 16
-    if n_intervals > max_intervals:
-        raise NotImplementedError(
-            f"Automatic axes creation is only supported for up to {max_intervals} intervals."
+def _get_n_axes(n_intervals, max_cols=4):
+    if n_intervals <= 0:
+        raise ValueError(
+            f"n_intervals should be a positive integer, but got {n_intervals}."
         )
-
-    table = [
-        (1, 1),
-        (1, 2),
-        (1, 3),
-        (2, 2),
-        (2, 3),
-        (2, 3),
-        (3, 3),
-        (3, 3),
-        (3, 3),
-        (4, 4),
-        (4, 4),
-        (4, 4),
-        (4, 4),
-        (4, 4),
-        (4, 4),
-        (4, 4),
-    ]
+    elif n_intervals < max_cols**2:
+        table = np.array(
+            [
+                (rows, cols)
+                for cols in range(1, max_cols + 1)
+                for rows in range(1, cols + 1)
+            ]
+        )
+        table = table[np.prod(table, axis=1) >= n_intervals]
+        (nrows, ncols) = table[np.argmin(np.prod(table, axis=1) - n_intervals)]
+    else:
+        nrows = np.ceil(n_intervals / max_cols).astype(int)
+        ncols = max_cols
 
     fig, axes = plt.subplots(
-        *table[n_intervals], sharex=True, sharey=True, squeeze=False
+        nrows=nrows, ncols=ncols, sharex=True, sharey=True, squeeze=False
     )
     return fig, axes.ravel()
 
@@ -325,7 +318,11 @@ def plot_dependence_functions(model, semantics=None, par_rename={}, axes=None):
 
 
 def plot_histograms_of_interval_distributions(
-    model, sample, semantics=None, plot_pdf=True
+    model,
+    sample,
+    semantics=None,
+    plot_pdf=True,
+    max_cols=4,
 ):
     """
     Plot histograms of all model dimensions.
@@ -343,6 +340,8 @@ def plot_histograms_of_interval_distributions(
         The description of the model. If None (the default) generic semantics will be used.
     plot_pdf: boolean, optional
         Whether the fitted probability density should be plotted. Defaults to True.
+    max_cols : int, default 4
+        Maximum number of columns (subfigures horizontally).
 
     Returns
     -------
@@ -419,7 +418,7 @@ def plot_histograms_of_interval_distributions(
                     np.sort(data_intervals[i]), np.sort(cond_dist.data_intervals[i])
                 )
 
-            fig, axes = _get_n_axes(n_intervals)
+            fig, axes = _get_n_axes(n_intervals, max_cols=max_cols)
             for interval_idx in range(n_intervals):
                 cond_val = conditioning_values[interval_idx]
                 data = data_intervals[interval_idx]
@@ -461,6 +460,8 @@ def plot_2D_isodensity(
     levels=None,
     ax=None,
     n_grid_steps=250,
+    cmap=None,
+    contour_kwargs=None,
 ):
     """
     Plot isodensity contours and a data sample for a 2D model.
@@ -491,6 +492,11 @@ def plot_2D_isodensity(
     ax : matplotlib Axes, optional
         Matplotlib axes object to use for plotting. If None (default) a new
         figure will be created.
+    cmap : matplotlib colormap, optional
+        The colormap to use for the isodensity contours.
+    contour_kwargs : dict
+        Any other keyword arguments for matplotlib.pyplot.contour().
+        Example: {"linewidths": [1,2,3], "linestyles": ["solid","dotted","dashed"]}
 
     Returns
     -------
@@ -565,13 +571,17 @@ def plot_2D_isodensity(
             ::-1
         ]
 
-    cmap = _rainbow_PuRd()
+    if cmap is None:
+        cmap = _rainbow_PuRd()
+    elif isinstance(cmap, str):
+        cmap = plt.get_cmap(cmap)
     colors = cmap(np.linspace(0, 1, num=n_levels))
-    CS = ax.contour(X, Y, Z, levels=levels, colors=colors)
-    proxies = [plt.Line2D([], [], color=pc.get_edgecolor()[0]) for pc in CS.collections]
+    contour_kwargs = {} if contour_kwargs is None else contour_kwargs
+    CS = ax.contour(X, Y, Z, levels=levels, colors=colors, **contour_kwargs)
+    handles, _ = CS.legend_elements()
     ax.legend(
-        proxies,
-        lvl_labels,
+        handles=handles,
+        labels=lvl_labels,
         loc="upper left",
         ncol=1,
         frameon=False,
@@ -598,6 +608,7 @@ def plot_2D_contour(
     semantics=None,
     swap_axis=False,
     ax=None,
+    plot_kwargs=None,
 ):
     """
     Plot a 2D contour.
@@ -624,6 +635,9 @@ def plot_2D_contour(
     ax : matplotlib Axes, optional
         Matplotlib axes object to use for plotting. If None (default) a new
         figure will be created.
+    plot_kwargs : dict
+        Any other keyword arguments to pass to the matplotlib plotting function,
+        Example: {"color": "blue", "linewidth": 2, "label": "100-year contour"
 
     Returns
     -------
@@ -686,7 +700,10 @@ def plot_2D_contour(
     # was reverted as we were not sure about the reason.
     # https://github.com/virocon-organization/virocon/commit/45482e0b5ff2d21c594f0e292b3db9c971881b5c
     # https://github.com/virocon-organization/virocon/pull/124#discussion_r684193507
-    ax.plot(x, y, c="#BB5566")
+    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
+    if "color" not in plot_kwargs and "c" not in plot_kwargs:
+        plot_kwargs["c"] = "#BB5566"
+    ax.plot(x, y, **plot_kwargs)
     # ax.plot(np.asarray(x, dtype=object), np.asarray(y, dtype=object), c="#BB5566")
 
     x_name = semantics["names"][x_idx]
