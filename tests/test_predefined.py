@@ -30,11 +30,10 @@ def test_DNVGL_Hs_Tz():
     contour = IFORMContour(model, alpha)
     coords = contour.coordinates
 
-    # Compare with the results from contours presented in Haselsteiner et al. (2019),
-    # https://doi.org/10.1115/OMAE2019-96523
-    # Highest Hs value is ca. 5 m, highest Tz value is ca. 16.2 s.
-    np.testing.assert_allclose(max(coords[:, 0]), 5, atol=1.5)
-    np.testing.assert_allclose(max(coords[:, 1]), 16.2, atol=2)
+    # The highest Hs value is ca. 10 m and the highest Tz value is ca. 17 s,
+    # see https://github.com/virocon-organization/virocon/pull/228/files#r2007155949
+    np.testing.assert_allclose(max(coords[:, 0]), 10, atol=1.5)
+    np.testing.assert_allclose(max(coords[:, 1]), 17, atol=2)
 
 
 def test_DNVGL_Hs_U():

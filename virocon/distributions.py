@@ -406,8 +406,13 @@ class Distribution(ABC):
         data : array_like
             The observed data to fit the distribution.
         method : str, optional
-            The method used for fitting. Defaults to 'mle' = maximum-likelihood estimation.
-            Other options are 'lsq' / 'wlsq' for (weighted) least squares.
+            The method used for fitting.
+
+             - "mle" = maximum-likelihood estimation (default)
+             - "mom" = method of moments
+             - "lsq" = least squares method
+             - "wlsq" = weighted least squares
+
         weights : None, str, array_like,
             The weights to use for weighted least squares fitting. Ignored otherwise.
             Defaults to None = equal weights.
@@ -417,18 +422,27 @@ class Distribution(ABC):
 
         if method.lower() == "mle":
             self._fit_mle(data)
+        elif method.lower() == "mom":
+            self._fit_mom(data)
         elif method.lower() == "lsq" or method.lower() == "wlsq":
             self._fit_lsq(data, weights)
         else:
             raise ValueError(
                 f"Unknown fit method '{method}'. "
-                "Only maximum likelihood estimation (keyword: mle) "
-                "and (weighted) least squares (keyword: (w)lsq) are supported."
+                "Only maximum likelihood estimation (keyword: mle) ",
+                "method of moments (keywork: mom)",
+                "and (weighted) least squares (keyword: (w)lsq) are supported.",
             )
 
     @abstractmethod
     def _fit_mle(self, data):
         """Fit the distribution using maximum likelihood estimation."""
+
+    def _fit_mom(self, data):
+        """Fit the distribution using the method of moments."""
+        raise NotImplementedError(
+            f"Fitting by method of moments is not implemented for class {self.__class__.__name__}."
+        )
 
     @abstractmethod
     def _fit_lsq(self, data, weights):
@@ -585,9 +599,15 @@ class WeibullDistribution(Distribution):
         return sts.weibull_min.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
     def _fit_mle(self, sample):
+        self._fit_scipy(sample, method="MLE")
+
+    def _fit_mom(self, sample):
+        self._fit_scipy(sample, method="MM")
+
+    def _fit_scipy(self, sample, method="MLE"):
         p0 = {"alpha": self.alpha, "beta": self.beta, "gamma": self.gamma}
 
-        fparams = {}
+        fparams = {"method": method}
         if self.f_beta is not None:
             fparams["f0"] = self.f_beta
         if self.f_gamma is not None:
@@ -727,9 +747,15 @@ class LogNormalDistribution(Distribution):
         return sts.lognorm.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
     def _fit_mle(self, sample):
+        self._fit_scipy(sample, method="MLE")
+
+    def _fit_mom(self, sample):
+        self._fit_scipy(sample, method="MM")
+
+    def _fit_scipy(self, sample, method="MLE"):
         p0 = {"scale": self._scale, "sigma": self.sigma}
 
-        fparams = {"floc": 0}
+        fparams = {"floc": 0, "method": method}
 
         if self.f_sigma is not None:
             fparams["f0"] = self.f_sigma
@@ -860,9 +886,15 @@ class NormalDistribution(Distribution):
         return sts.norm.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
     def _fit_mle(self, sample):
+        self._fit_scipy(sample, method="MLE")
+
+    def _fit_mom(self, sample):
+        self._fit_scipy(sample, method="MM")
+
+    def _fit_scipy(self, sample, method="MLE"):
         p0 = {"loc": self.mu, "scale": self.sigma}
 
-        fparams = {}
+        fparams = {"method": method}
 
         if self.f_mu is not None:
             fparams["floc"] = self.f_mu
@@ -965,6 +997,10 @@ class LogNormalNormFitDistribution(LogNormalDistribution):
         scipy_par = self._get_scipy_parameters(mu_norm, sigma_norm)
         rvs_size = self._get_rvs_size(n, scipy_par)
         return sts.lognorm.rvs(*scipy_par, size=rvs_size, random_state=random_state)
+
+    def _fit_mom(self, sample):
+        # This is needed to avoid calling the corresponding implementation of the parent class.
+        raise NotImplementedError()
 
     def _fit_mle(self, sample):
         if self.f_mu_norm is None:
@@ -1079,9 +1115,15 @@ class ExponentiatedWeibullDistribution(Distribution):
         return sts.exponweib.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
     def _fit_mle(self, sample):
+        self._fit_scipy(sample, method="MLE")
+
+    def _fit_mom(self, sample):
+        self._fit_scipy(sample, method="MM")
+
+    def _fit_scipy(self, sample, method="MLE"):
         p0 = {"alpha": self.alpha, "beta": self.beta, "delta": self.delta}
 
-        fparams = {"floc": 0}
+        fparams = {"floc": 0, "method": method}
 
         if self.f_delta is not None:
             fparams["f0"] = self.f_delta
@@ -1339,9 +1381,15 @@ class GeneralizedGammaDistribution(Distribution):
         return sts.gengamma.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
     def _fit_mle(self, sample):
+        self._fit_scipy(sample, method="MLE")
+
+    def _fit_mom(self, sample):
+        self._fit_scipy(sample, method="MM")
+
+    def _fit_scipy(self, sample, method="MLE"):
         p0 = {"m": self.m, "c": self.c, "scale": self._scale}
 
-        fparams = {"floc": 0}
+        fparams = {"floc": 0, "method": method}
 
         if self.f_m is not None:
             fparams["fshape1"] = self.f_m
@@ -1478,9 +1526,15 @@ class VonMisesDistribution(Distribution):
         return sts.vonmises.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
     def _fit_mle(self, sample):
+        self._fit_scipy(sample, method="MLE")
+
+    def _fit_mom(self, sample):
+        self._fit_scipy(sample, method="MM")
+
+    def _fit_scipy(self, sample, method="MLE"):
         p0 = {"shape": self.kappa, "loc": self.mu}
 
-        fparams = {"fscale": 1}
+        fparams = {"fscale": 1, "method": method}
 
         if self.f_mu is not None:
             fparams["floc"] = self.f_mu
@@ -1612,12 +1666,18 @@ class ScipyDistribution(Distribution):
         return self.scipy_dist.rvs(*scipy_par, size=rvs_size, random_state=random_state)
 
     def _fit_mle(self, sample):
+        self._fit_scipy(sample, method="MLE")
+
+    def _fit_mom(self, sample):
+        self._fit_scipy(sample, method="MM")
+
+    def _fit_scipy(self, sample, method="MLE"):
         # Split initial parameter values into positional shape parameters and loc and scale.
         p0 = [v for k, v in self.parameters.items() if k != "loc" and k != "scale"]
         loc0 = self.parameters.get("loc", 0)
         scale0 = self.parameters.get("scale", 1)
 
-        fparams = {}
+        fparams = {"method": method}
         for par_name in self._param_names:
             val = getattr(self, f"f_{par_name}")
             if val is not None:
