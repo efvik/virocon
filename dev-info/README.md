@@ -5,9 +5,9 @@ When a new version is released, we make sure that it is available in GitHub arch
 GitHub archive:
 
 * checkout main
-* in virocon/__init__.py change __version__ = "1.1.3" (to the new version number)
-* `git commit`
-* `git tag 1.1.3 -m "Your commit message"`
+* in virocon/__init__.py change __version__ = "1.2.3" (to the new version number)
+* `git commit -am "Bump version to 1.2.3"`
+* `git tag -a 1.2.3 -m "Release version 1.2.3"`
 * `git push --tags origin main`
 * create a release from the tag on Github
 
