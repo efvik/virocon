@@ -1254,7 +1254,7 @@ class GeneralizedGammaDistribution(Distribution):
     c : float
         Second shape parameter of the generalized Gamma distribution. Defaults
         to 1.
-    lambda\_ : float
+    lambda_ : float
         Scale parameter of the generalized Gamma distribution.
         Defaults to 1.
     f_m : float
@@ -1267,9 +1267,9 @@ class GeneralizedGammaDistribution(Distribution):
        given  physical parameter). If this parameter is set, c is ignored. The
        fixed parameter does not change, even when fitting the distribution.
        Defaults to None.
-    f_lambda\_ : float
+    f_lambda_ : float
         Fixed reciprocal scale parameter of the generalized Gamma distribution
-        (e.g. given physical parameter). If this parameter is set, lambda\_ is
+        (e.g. given physical parameter). If this parameter is set, lambda_ is
         ignored. The fixed parameter does not change, even when fitting the distribution.
         Defaults to None.
 
@@ -1326,7 +1326,7 @@ class GeneralizedGammaDistribution(Distribution):
         c : float, optional
             The second shape parameter. Defaults to self.c.
         lambda_: float, optional
-            The reciprocal scale parameter . Defaults to self.lambda\_.
+            The reciprocal scale parameter . Defaults to self.lambda_.
 
         """
 
@@ -1347,7 +1347,7 @@ class GeneralizedGammaDistribution(Distribution):
         c : float, optional
             The second shape parameter. Defaults to self.c.
         lambda_: float, optional
-            The reciprocal scale parameter . Defaults to self.lambda\_.
+            The reciprocal scale parameter . Defaults to self.lambda_.
 
         """
 
@@ -1368,7 +1368,7 @@ class GeneralizedGammaDistribution(Distribution):
         c : float, optional
             The second shape parameter. Defaults to self.k.
         lambda_: float, optional
-            The reciprocal scale parameter . Defaults to self.lambda\_.
+            The reciprocal scale parameter . Defaults to self.lambda_.
 
         """
 
