@@ -251,7 +251,10 @@ def get_OMAE2020_V_Hs():
         return a + b / (1 + np.exp(c * (x - d)))
 
     def _alpha3(x, a, b, c, d_of_x):
-        return (a + b * x**c) / 2.0445 ** (1 / d_of_x(x))
+        x_pos = np.where(  # this prevents 'invalid value encountered in power' warning
+            x >= 0, x, np.nan
+        )
+        return (a + b * x_pos**c) / 2.0445 ** (1 / d_of_x(x_pos))
 
     logistics_bounds = [(0, None), (0, None), (None, 0), (0, None)]
 

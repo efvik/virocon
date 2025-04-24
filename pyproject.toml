@@ -62,7 +62,6 @@ testpaths = [
 ]
 filterwarnings = [
     "error",
-    "ignore:invalid value encountered in power:RuntimeWarning",
 ]
 
 [tool.ruff]
