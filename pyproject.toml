@@ -60,7 +60,11 @@ testpaths = [
     "tests",
     "virocon",
 ]
-
+filterwarnings = [
+    "error",
+    "ignore:Conversion of an array with ndim \\> 0 to a scalar is deprecated:DeprecationWarning",
+    "ignore:invalid value encountered in power:RuntimeWarning",
+]
 
 [tool.ruff]
 target-version = "py312"
