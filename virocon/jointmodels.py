@@ -66,7 +66,7 @@ class MultivariateModel(ABC):
                 assert len(args) == n_dim
                 # sort arguments as expected by pdf (the models order)
                 x = np.array(args)[np.argsort(arg_order)].reshape((1, n_dim))
-                return self.pdf(x)
+                return self.pdf(x).item()
 
             return integral_func
 
@@ -889,7 +889,7 @@ class TransformedModel(MultivariateModel):
                 assert len(args) == n_dim
                 # sort arguments as expected by pdf (the models order)
                 x = np.array(args)[np.argsort(arg_order)].reshape((1, n_dim))
-                return self.pdf(x)
+                return self.pdf(x).item()
 
             return integral_func
 
