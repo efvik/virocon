@@ -61,7 +61,7 @@ testpaths = [
     "virocon",
 ]
 filterwarnings = [
-    "error",
+    "error",  # raise warnings as errors during test
 ]
 
 [tool.ruff]

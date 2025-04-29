@@ -59,7 +59,7 @@ def get_DNVGL_Hs_Tz():
 
     bounds = [(0, None), (0, None), (None, None)]
 
-    power3 = DependenceFunction(_power3, bounds, latex=r"$a + b * x^c$")
+    power3 = DependenceFunction(_power3, bounds, latex="$a + b * x^c$")
     exp3 = DependenceFunction(_exp3, bounds, latex=r"$a + b * \exp(c * x)$")
 
     dist_description_hs = {
@@ -118,8 +118,8 @@ def get_DNVGL_Hs_U():
 
     bounds = [(0, None), (0, None), (None, None)]
 
-    alpha_dep = DependenceFunction(_power3, bounds=bounds, latex=r"$a + b * x^c$")
-    beta_dep = DependenceFunction(_power3, bounds=bounds, latex=r"$a + b * x^c$")
+    alpha_dep = DependenceFunction(_power3, bounds=bounds, latex="$a + b * x^c$")
+    beta_dep = DependenceFunction(_power3, bounds=bounds, latex="$a + b * x^c$")
 
     dist_description_hs = {
         "distribution": WeibullDistribution(),
@@ -185,7 +185,7 @@ def get_OMAE2020_Hs_Tz():
     bounds = [(0, None), (0, None), (None, None)]
 
     sigma_dep = DependenceFunction(
-        _asymdecrease3, bounds=bounds, latex=r"$a + b / (1 + c * x)$"
+        _asymdecrease3, bounds=bounds, latex="$a + b / (1 + c * x)$"
     )
     mu_dep = DependenceFunction(
         _lnsquare2, bounds=bounds, latex=r"$\ln(a + b \sqrt{x / 9.81})$"
@@ -271,7 +271,7 @@ def get_OMAE2020_V_Hs():
         alpha_bounds,
         d_of_x=beta_dep,
         weights=lambda x, y: y,
-        latex=r"$(a + b * x^c) / 2.0445^{1 / F()}$",
+        latex="$(a + b * x^c) / 2.0445^{1 / F()}$",
     )
 
     dist_description_v = {
