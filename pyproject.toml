@@ -60,7 +60,9 @@ testpaths = [
     "tests",
     "virocon",
 ]
-
+filterwarnings = [
+    "error",  # raise warnings as errors during test
+]
 
 [tool.ruff]
 target-version = "py312"

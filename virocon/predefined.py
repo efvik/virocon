@@ -60,7 +60,7 @@ def get_DNVGL_Hs_Tz():
     bounds = [(0, None), (0, None), (None, None)]
 
     power3 = DependenceFunction(_power3, bounds, latex="$a + b * x^c$")
-    exp3 = DependenceFunction(_exp3, bounds, latex="$a + b * \exp(c * x)$")
+    exp3 = DependenceFunction(_exp3, bounds, latex=r"$a + b * \exp(c * x)$")
 
     dist_description_hs = {
         "distribution": WeibullDistribution(),
@@ -188,7 +188,7 @@ def get_OMAE2020_Hs_Tz():
         _asymdecrease3, bounds=bounds, latex="$a + b / (1 + c * x)$"
     )
     mu_dep = DependenceFunction(
-        _lnsquare2, bounds=bounds, latex="$\ln(a + b \sqrt{x / 9.81})$"
+        _lnsquare2, bounds=bounds, latex=r"$\ln(a + b \sqrt{x / 9.81})$"
     )
 
     dist_description_hs = {
@@ -251,7 +251,10 @@ def get_OMAE2020_V_Hs():
         return a + b / (1 + np.exp(c * (x - d)))
 
     def _alpha3(x, a, b, c, d_of_x):
-        return (a + b * x**c) / 2.0445 ** (1 / d_of_x(x))
+        x_pos = np.where(  # this prevents 'invalid value encountered in power' warning
+            x >= 0, x, np.nan
+        )
+        return (a + b * x_pos**c) / 2.0445 ** (1 / d_of_x(x_pos))
 
     logistics_bounds = [(0, None), (0, None), (None, 0), (0, None)]
 
@@ -261,7 +264,7 @@ def get_OMAE2020_V_Hs():
         _logistics4,
         logistics_bounds,
         weights=lambda x, y: y,
-        latex="$a + b / (1 + \exp[c * (x -d)])$",
+        latex=r"$a + b / (1 + \exp[c * (x -d)])$",
     )
     alpha_dep = DependenceFunction(
         _alpha3,

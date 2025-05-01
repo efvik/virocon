@@ -25,7 +25,7 @@ class DependenceFunction:
         Dependence functions for the parameter.
         Maps a conditioning value x and an arbitrary number of parameters to
         the value of a distributions parameter y.
-        func(x, \* args) -> y
+        func(x, \\* args) -> y
     bounds : list
         Boundaries for parameters of func.
         Fixed scalar boundaries for func's parameters.
@@ -46,7 +46,7 @@ class DependenceFunction:
         If given, this string will be used in plots to label the dependence
         function. It is interpreted as latex and shoul be specified using the
         same symbols that are used in the function definition.
-        Example: latex="$a + b \* x^{c}$"
+        Example: latex="$a + b \\* x^{c}$"
 
 
     Examples

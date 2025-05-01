@@ -866,7 +866,7 @@ class AndContour(Contour):
     allowed_error : float, optional
         Required precision for the alpha value. For example 0.1 means that
         the algorithm searches along the path until the probability of exceedance
-        at the current point p_e satisfies \| p_e - alpha \| / alpha < 0.1.
+        at the current point p_e satisfies \\| p_e - alpha \\| / alpha < 0.1.
         Defaults to 0.01.
 
     Attributes
@@ -953,8 +953,8 @@ class AndContour(Contour):
                         UserWarning,
                     )
                     break
-            coords_x[i] = current_vector[0]
-            coords_y[i] = current_vector[1]
+            coords_x[i] = current_vector.item(0)
+            coords_y[i] = current_vector.item(1)
         coords_x[-1] = 0
         coords_y[-1] = 0
         self.coordinates = np.array([coords_x, coords_y]).T
@@ -985,7 +985,7 @@ class OrContour(Contour):
     allowed_error : float, optional
         Required precision for the alpha value. For example 0.1 means that
         the algorithm searches along the path until the probability of exceedance
-        at the current point p_e satisfies \| p_e - alpha \| / alpha < 0.1.
+        at the current point p_e satisfies \\| p_e - alpha \\| / alpha < 0.1.
         Defaults to 0.01.
     lowest_theta : float, optional
         Lowest angle considered in the calculation of the contour. Given in deg.
