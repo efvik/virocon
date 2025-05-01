@@ -1,11 +1,11 @@
-# This YAML config is inspired by this comment on how to use uv for readthedocs: 
+# This YAML config is inspired by this comment on how to use uv for readthedocs:
 # https://github.com/astral-sh/uv/issues/10074#issuecomment-2691610818
 version: 2
 
 build:
   os: ubuntu-24.04
   tools:
-    python: "3.12"
+    python: "3.13"
   jobs:
       create_environment:
         - asdf plugin add uv
